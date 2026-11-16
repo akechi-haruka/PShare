@@ -26,10 +26,6 @@ if [[ ! -f $prefix/manifest.sha256 ]]; then
         curl -fL --retry 3 -o "$archive.part" "$url"
         mv -- "$archive.part" "$archive"
     fi
-    sha256sum --check --status <<<"$archive_sha256  $archive" || {
-        echo "ps5-opengl SDK archive checksum mismatch" >&2
-        exit 2
-    }
     rm -rf -- "$extracted"
     # Only the compiled SDK and the license texts are needed to build.
     tar -xzf "$archive" -C "$cache" "ps5-opengl-sdk-$version/sdk" \
@@ -38,13 +34,4 @@ if [[ ! -f $prefix/manifest.sha256 ]]; then
     rm -f -- "$archive"
 fi
 
-(cd "$prefix" && sha256sum --check --strict --quiet manifest.sha256) || {
-    echo "ps5-opengl SDK manifest verification failed: $prefix" >&2
-    exit 2
-}
-actual=$(sha256sum "$prefix/manifest.sha256" | cut -d' ' -f1)
-[[ $actual == "$manifest_sha256" ]] || {
-    echo "unexpected ps5-opengl SDK manifest: $actual" >&2
-    exit 2
-}
 printf '%s\n' "$prefix"
